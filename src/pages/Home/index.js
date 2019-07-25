@@ -1,8 +1,72 @@
-import React from 'react';
-import { View } from 'react-native';
+import React, { Component } from 'react';
+import { View, FlatList } from 'react-native';
+import api from '../../services/api';
 
-// import { Container } from './styles';
+import { formatPrice } from '../../utils/format';
 
-export default function Home() {
-  return <View />;
+import {
+  Container,
+  ProductItem,
+  ProductImage,
+  ProductInfo,
+  Title,
+  Price,
+  ProductButton,
+  Qtd,
+  QtdText,
+  ProductButtonText,
+} from './styles';
+
+class Home extends Component {
+  state = {
+    products: [],
+  };
+
+  async componentDidMount() {
+    this.handleGetProductsData();
+  }
+
+  handleGetProductsData = async () => {
+    const response = await api.get('/products');
+    const data = response.map(product => ({
+      ...product,
+      priceFormatted: formatPrice(product.price),
+    }));
+
+    this.setState({ products: data });
+  };
+
+  keyExtractor = item => String(item.id);
+
+  renderItem = ({ item }) => (
+    <ProductItem>
+      <ProductImage source={{ uri: item.image }} />
+      <ProductInfo>
+        <Title>{item.title}</Title>
+        <Price>R$179,90</Price>
+      </ProductInfo>
+      <ProductButton>
+        <Qtd>
+          <QtdText>3</QtdText>
+        </Qtd>
+        <ProductButtonText>Adicionar</ProductButtonText>
+      </ProductButton>
+    </ProductItem>
+  );
+
+  render() {
+    const { products } = this.state;
+    return (
+      <Container>
+        <FlatList
+          data={products}
+          horizontal
+          keyExtractor={this.keyExtractor}
+          renderItem={this.renderItem}
+        />
+      </Container>
+    );
+  }
 }
+
+export default Home;
