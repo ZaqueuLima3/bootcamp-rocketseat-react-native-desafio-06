@@ -12,7 +12,9 @@ export const Cotent = styled.View`
   padding: 20px;
 `;
 
-export const ListItems = styled.FlatList``;
+export const ListItems = styled.FlatList.attrs({
+  showsVerticalScrollIndicator: false,
+})``;
 
 export const ProductItem = styled.View`
   flex: 1;

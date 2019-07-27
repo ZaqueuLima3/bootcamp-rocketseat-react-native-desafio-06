@@ -45,17 +45,14 @@ export const ProductButton = styled.TouchableOpacity`
   flex-direction: row;
 `;
 
-export const Qtd = styled.View`
+export const QtdText = styled.Text`
+  color: #fff;
+  font-weight: bold;
   display: flex;
   align-items: center;
   flex-direction: row;
   padding: 12px;
   background-color: #00000020;
-`;
-
-export const QtdText = styled.Text`
-  color: #fff;
-  font-weight: bold;
 `;
 
 export const ProductButtonText = styled.Text`

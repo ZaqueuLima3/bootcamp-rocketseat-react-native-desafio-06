@@ -1,6 +1,12 @@
 import React, { Component } from 'react';
-import { View, FlatList } from 'react-native';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+
+import { FlatList } from 'react-native';
+
 import api from '../../services/api';
+
+import * as CartActions from '../../store/modules/cart/actions';
 
 // import { formatPrice } from '../../utils/format';
 
@@ -12,7 +18,6 @@ import {
   Title,
   Price,
   ProductButton,
-  Qtd,
   QtdText,
   ProductButtonText,
 } from './styles';
@@ -26,11 +31,17 @@ class Home extends Component {
     this.handleGetProductsData();
   }
 
+  handleAddProduct = async id => {
+    const { addToCartRequest } = this.props;
+
+    addToCartRequest(id);
+  };
+
   handleGetProductsData = async () => {
     const response = await api.get('/products');
     const data = response.data.map(product => ({
       ...product,
-      priceFormatted: `R$ ${product.price}`,
+      priceFormatted: `R$ ${product.price.toFixed(2)}`.replace('.', ','),
     }));
 
     this.setState({ products: data });
@@ -38,28 +49,32 @@ class Home extends Component {
 
   keyExtractor = item => String(item.id);
 
-  renderItem = ({ item }) => (
-    <ProductItem>
-      <ProductImage source={{ uri: item.image }} />
-      <ProductInfo>
-        <Title>{item.title}</Title>
-        <Price>{item.priceFormatted}</Price>
-      </ProductInfo>
-      <ProductButton onPress={() => {}}>
-        <Qtd>
-          <QtdText>3</QtdText>
-        </Qtd>
-        <ProductButtonText>Adicionar </ProductButtonText>
-      </ProductButton>
-    </ProductItem>
-  );
+  renderItem = ({ item }) => {
+    const { amount } = this.props;
+
+    return (
+      <ProductItem>
+        <ProductImage source={{ uri: item.image }} />
+        <ProductInfo>
+          <Title>{item.title}</Title>
+          <Price>{item.priceFormatted}</Price>
+        </ProductInfo>
+        <ProductButton onPress={() => this.handleAddProduct(item.id)}>
+          <QtdText>{amount[item.id] || 0}</QtdText>
+          <ProductButtonText>ADICIONAR</ProductButtonText>
+        </ProductButton>
+      </ProductItem>
+    );
+  };
 
   render() {
     const { products } = this.state;
+
     return (
       <Container>
         <FlatList
           data={products}
+          extraData={this.props}
           horizontal
           keyExtractor={this.keyExtractor}
           renderItem={this.renderItem}
@@ -69,4 +84,17 @@ class Home extends Component {
   }
 }
 
-export default Home;
+const mapStateToProps = state => ({
+  amount: state.cart.reduce((amount, product) => {
+    amount[product.id] = product.amount;
+    return amount;
+  }, {}),
+});
+
+const mapDispatchToProps = dispatch =>
+  bindActionCreators(CartActions, dispatch);
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Home);

@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+
 import { View, Text } from 'react-native';
 
 import {
@@ -25,43 +27,40 @@ class Cart extends Component {
   keyExtractor = item => String(item.id);
 
   renderItem = ({ item }) => (
-    <ListItems
-      data={[]}
-      keyExtractor={this.keyExtractor}
-      renderItem={this.renderItem}
-    />
+    <ProductItem>
+      <ProductBody>
+        <ItemImage source={{ uri: item.image }} />
+
+        <ProductInfo>
+          <ProductInfoTitle>{item.title}</ProductInfoTitle>
+          <ProductInfoPrice>{item.priceFormatted}</ProductInfoPrice>
+        </ProductInfo>
+      </ProductBody>
+
+      <ProductFooter>
+        <ProductQtd value={String(item.amount)} editable={false} />
+
+        <ProductTotal>{item.subTotal}</ProductTotal>
+      </ProductFooter>
+    </ProductItem>
   );
 
   render() {
+    const { cart, total } = this.props;
+    console.tron.log();
     return (
       <Container>
         <Cotent>
-          <ProductItem>
-            <ProductBody>
-              <ItemImage
-                source={{
-                  uri:
-                    'https://rocketseat-cdn.s3-sa-east-1.amazonaws.com/modulo-redux/tenis2.jpg',
-                }}
-              />
-
-              <ProductInfo>
-                <ProductInfoTitle>Tenis</ProductInfoTitle>
-                <ProductInfoPrice>R$ 179,90</ProductInfoPrice>
-              </ProductInfo>
-            </ProductBody>
-
-            <ProductFooter>
-              <ProductQtd value="3" />
-
-              <ProductTotal>R$ 539,70</ProductTotal>
-            </ProductFooter>
-          </ProductItem>
+          <ListItems
+            data={cart}
+            keyExtractor={this.keyExtractor}
+            renderItem={this.renderItem}
+          />
 
           <ContentFooter>
             <FooterTitle>Total</FooterTitle>
 
-            <Total>R$ 1619,10</Total>
+            <Total>{total}</Total>
 
             <FinishOrderButton onPress={() => {}}>
               <FinishOrderButtonText>Finalizar pedido</FinishOrderButtonText>
@@ -73,4 +72,19 @@ class Cart extends Component {
   }
 }
 
-export default Cart;
+const mapStateToProps = state => ({
+  cart: state.cart.map(product => ({
+    ...product,
+    subTotal: `R$ ${(product.price * product.amount).toFixed(2)}`.replace(
+      '.',
+      ','
+    ),
+  })),
+  total: `R$ ${state.cart
+    .reduce((total, product) => {
+      return total + product.price * product.amount;
+    }, 0)
+    .toFixed(2)}`.replace('.', ','),
+});
+
+export default connect(mapStateToProps)(Cart);
