@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { View, FlatList } from 'react-native';
 import api from '../../services/api';
 
-import { formatPrice } from '../../utils/format';
+// import { formatPrice } from '../../utils/format';
 
 import {
   Container,
@@ -28,9 +28,9 @@ class Home extends Component {
 
   handleGetProductsData = async () => {
     const response = await api.get('/products');
-    const data = response.map(product => ({
+    const data = response.data.map(product => ({
       ...product,
-      priceFormatted: formatPrice(product.price),
+      priceFormatted: `R$ ${product.price}`,
     }));
 
     this.setState({ products: data });
@@ -43,13 +43,13 @@ class Home extends Component {
       <ProductImage source={{ uri: item.image }} />
       <ProductInfo>
         <Title>{item.title}</Title>
-        <Price>R$179,90</Price>
+        <Price>{item.priceFormatted}</Price>
       </ProductInfo>
-      <ProductButton>
+      <ProductButton onPress={() => {}}>
         <Qtd>
           <QtdText>3</QtdText>
         </Qtd>
-        <ProductButtonText>Adicionar</ProductButtonText>
+        <ProductButtonText>Adicionar </ProductButtonText>
       </ProductButton>
     </ProductItem>
   );

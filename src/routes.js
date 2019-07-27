@@ -9,8 +9,8 @@ import Header from './components/Header';
 const Routes = createAppContainer(
   createStackNavigator(
     {
-      Home,
       Cart,
+      Home,
     },
     {
       headerLayoutPreset: 'center',
